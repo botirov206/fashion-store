@@ -79,10 +79,13 @@ nano .env
 
 ```env
 DATABASE_URL=postgresql://USER:PASSWORD@ep-xxxx.region.aws.neon.tech/neondb?sslmode=require
-PORT=3010
+
+ADMIN_USERNAME=admin
+ADMIN_PASSWORD=your-password
+SESSION_SECRET=some-random-string
 ```
 
-`PORT` is the **host** port Docker binds to (container still runs on 3000 inside). Use `3010` if another app already uses `3000`.
+Production Docker **always** uses host port `3010` (hardcoded in `docker-compose.prod.yml`). Nginx proxies to `http://127.0.0.1:3010`. You do not need `PORT` in server `.env` for Docker.
 
 ```bash
 chmod 600 .env
@@ -127,7 +130,7 @@ curl http://127.0.0.1:3010/api/products
 If `curl` fails with "Could not connect", check:
 
 1. Container is up — run `up -d` again, not `down`
-2. Server `.env` has `PORT=3010` and `docker compose ps` shows `127.0.0.1:3010->3000/tcp`
+2. `docker compose ps` shows `127.0.0.1:3010->3000/tcp`
 
 ---
 
@@ -187,7 +190,7 @@ Reuses the same `EC2_HOST`, `EC2_USER`, and `EC2_SSH_KEY` secrets as your other 
 | ------- | --- |
 | Container `Restarting` | `docker compose -f docker-compose.prod.yml logs web` — usually missing files in image or bad `DATABASE_URL` |
 | Container exits | `docker compose -f docker-compose.prod.yml logs web` — check `DATABASE_URL` in `.env` |
-| curl connection refused | Container stopped (`down` was run) — run `up -d` again; confirm `PORT=3010` in `.env` |
+| curl connection refused | Container stopped (`down` was run) — run `up -d` again; confirm `127.0.0.1:3010->3000/tcp` in `ps` |
 | Nginx 502 | App not running or proxy must target `http://127.0.0.1:3010` |
 | CI/CD SSH fails | See [CI_CD.md](./CI_CD.md) — reuse `EC2_HOST`, `EC2_USER`, `EC2_SSH_KEY` from other project |
 

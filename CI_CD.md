@@ -71,5 +71,5 @@ Repo → **Actions** → **Deploy** → **Run workflow**
 | ------- | --- |
 | SSH connection failed | Check `EC2_HOST`, `EC2_USER`, `EC2_SSH_KEY` match the other working project |
 | `not a git repo` | Run `git clone https://github.com/botirov206/fashion-store.git /var/www/fashion-store` on the server |
-| Health check fails | Check `.env` on server (`DATABASE_URL`, `PORT=3010`); run `docker compose -f docker-compose.prod.yml logs web` |
+| Health check fails | Check `.env` on server (`DATABASE_URL`); run `docker compose -f docker-compose.prod.yml logs web` |
 | Permission denied (docker) | `sudo usermod -aG docker ubuntu` then log out/in |
