@@ -5,7 +5,12 @@ WORKDIR /app
 COPY package.json ./
 RUN npm install --omit=dev --silent
 
-COPY db.js server.js ./
+COPY prisma ./prisma
+RUN npm install prisma --no-save --silent \
+  && npx prisma generate \
+  && npm uninstall prisma --silent
+
+COPY db.js server.js admin.js prisma-client.js ./
 COPY public ./public
 
 EXPOSE 3000
