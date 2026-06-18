@@ -2,6 +2,8 @@
 
 Deploy via Git clone so updates are `git pull` + rebuild. CI/CD can be added on top of this later.
 
+**Domain:** `https://fashioon.kahoot.uz`
+
 **App path on server:** `/var/www/fashion-store`
 
 **Stack:** Docker (app on host port **3010**) → Neon PostgreSQL (`DATABASE_URL`) → Nginx (optional, for public access)
@@ -44,7 +46,7 @@ Never commit `.env` — it is in `.gitignore`.
 ## 4. Server setup
 
 ```bash
-ssh deploy@YOUR_SERVER_IP
+ssh ubuntu@YOUR_SERVER_IP
 
 sudo apt update && sudo apt upgrade -y
 curl -fsSL https://get.docker.com | sudo sh
@@ -131,20 +133,24 @@ If `curl` fails with "Could not connect", check:
 
 ## 8. Nginx (public access)
 
+Point DNS **A record** for `fashioon.kahoot.uz` to your server IP.
+
 ```bash
 sudo apt install -y nginx
 sudo cp /var/www/fashion-store/deploy/nginx/fashion-store.conf /etc/nginx/sites-available/fashion-store
-sudo nano /etc/nginx/sites-available/fashion-store   # set server_name; proxy_pass must be http://127.0.0.1:3010
+sudo nano /etc/nginx/sites-available/fashion-store   # server_name should be fashioon.kahoot.uz; proxy_pass http://127.0.0.1:3010
 sudo ln -sf /etc/nginx/sites-available/fashion-store /etc/nginx/sites-enabled/
 sudo rm -f /etc/nginx/sites-enabled/default
 sudo nginx -t && sudo systemctl reload nginx
 ```
 
-HTTPS (domain required):
+Open: `http://fashioon.kahoot.uz`
+
+HTTPS:
 
 ```bash
 sudo apt install -y certbot python3-certbot-nginx
-sudo certbot --nginx -d your-domain.com
+sudo certbot --nginx -d fashioon.kahoot.uz
 ```
 
 Firewall:
@@ -167,18 +173,11 @@ docker compose -f docker-compose.prod.yml up -d --build
 
 ---
 
-## 10. CI/CD (next step)
+## 10. CI/CD
 
-This manual flow is the base for automation:
+See **[CI_CD.md](./CI_CD.md)** for GitHub Actions setup.
 
-1. **GitHub Actions** — run tests on every push to `main`
-2. **Deploy job** — SSH into the VPS (or use a self-hosted runner) and run:
-
-   ```bash
-   cd /var/www/fashion-store && git pull && docker compose -f docker-compose.prod.yml up -d --build
-   ```
-
-Store server secrets in GitHub → **Settings → Secrets and variables → Actions** (`SSH_HOST`, `SSH_USER`, `SSH_KEY`, etc.).
+Reuses the same `EC2_HOST`, `EC2_USER`, and `EC2_SSH_KEY` secrets as your other project on this server (`ubuntu` user).
 
 ---
 
@@ -189,7 +188,7 @@ Store server secrets in GitHub → **Settings → Secrets and variables → Acti
 | Container exits | `docker compose -f docker-compose.prod.yml logs web` — check `DATABASE_URL` in `.env` |
 | curl connection refused | Container stopped (`down` was run) — run `up -d` again; confirm `PORT=3010` in `.env` |
 | Nginx 502 | App not running or proxy must target `http://127.0.0.1:3010` |
-| Browser unreachable | `sudo ufw status`; open 80/443 in cloud provider firewall |
+| CI/CD SSH fails | See [CI_CD.md](./CI_CD.md) — reuse `EC2_HOST`, `EC2_USER`, `EC2_SSH_KEY` from other project |
 
 ---
 
@@ -200,3 +199,4 @@ Store server secrets in GitHub → **Settings → Secrets and variables → Acti
 | First deploy | `git clone` → `.env` → `docker compose -f docker-compose.prod.yml up -d --build` |
 | Update | `git pull` → `docker compose -f docker-compose.prod.yml up -d --build` |
 | Health | `curl http://127.0.0.1:3010/api/health` |
+| App URL | `https://fashioon.kahoot.uz` |

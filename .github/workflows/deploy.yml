@@ -1,0 +1,47 @@
+name: Deploy
+
+on:
+  push:
+    branches: [main, master]
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to EC2 (Docker + Nginx)
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy via SSH
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script_stop: true
+          script: |
+            set -euo pipefail
+
+            APP_DIR="/var/www/fashion-store"
+
+            echo "==> Deploying Fashion Store"
+            echo "    Path:   ${APP_DIR}"
+            echo "    Commit: ${{ github.sha }}"
+
+            cd "${APP_DIR}"
+
+            if [ ! -d .git ]; then
+              echo "ERROR: ${APP_DIR} is not a git repo. Clone first (see DEPLOYMENT.md)."
+              exit 1
+            fi
+
+            git remote set-url origin "https://github.com/${{ github.repository }}.git"
+            git fetch origin
+            git reset --hard origin/main || git reset --hard origin/master
+
+            echo "==> Rebuilding Docker container..."
+            docker compose -f docker-compose.prod.yml up -d --build
+
+            echo "==> Health check..."
+            curl -sf http://127.0.0.1:3010/api/health
+
+            docker compose -f docker-compose.prod.yml ps

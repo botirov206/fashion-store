@@ -1,13 +1,23 @@
 require('dotenv').config();
 
 const express = require('express');
+const session = require('express-session');
 const path = require('path');
 const { pool, initDB } = require('./db');
+const adminRouter = require('./admin');
 
 const app = express();
 const PORT = Number(process.env.PORT) || 3000;
 
+app.use(session({
+  secret: process.env.SESSION_SECRET || 'fashion-admin-secret-change-me',
+  resave: false,
+  saveUninitialized: false,
+  cookie: { maxAge: 8 * 60 * 60 * 1000 }, // 8 hours
+}));
+
 app.use(express.json({ limit: '32kb' }));
+app.use('/admin', adminRouter);
 app.use(express.static(path.join(__dirname, 'public')));
 
 function isValidEmail(email) {
