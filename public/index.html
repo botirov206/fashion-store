@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fashion Store</title>
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <header>
+    <div class="brand">
+      <h1>FASHION STORE</h1>
+      <p>Zamonaviy kiyim-kechak do'koni</p>
+    </div>
+    <div class="meta">Frankfurt · AWS Cloud</div>
+  </header>
+
+  <nav class="toolbar" aria-label="Kategoriyalar">
+    <button class="filter-btn active" data-category="all">Barchasi</button>
+    <button class="filter-btn" data-category="Erkaklar">Erkaklar</button>
+    <button class="filter-btn" data-category="Ayollar">Ayollar</button>
+    <button class="filter-btn" data-category="Sport">Sport</button>
+    <button class="filter-btn" data-category="Casual">Casual</button>
+    <button class="filter-btn" data-category="Rasmiy">Rasmiy</button>
+  </nav>
+
+  <div id="statusBanner" class="status-banner" role="status" aria-live="polite"></div>
+
+  <main class="products" id="productsGrid"></main>
+
+  <div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+    <div class="modal">
+      <h2 id="modalTitle">Buyurtma berish</h2>
+      <div class="product-info" id="modalProductInfo"></div>
+
+      <div class="field">
+        <label for="customerName">Ism</label>
+        <input type="text" id="customerName" autocomplete="name" required>
+      </div>
+
+      <div class="field">
+        <label for="customerEmail">Email</label>
+        <input type="email" id="customerEmail" autocomplete="email" required>
+      </div>
+
+      <div class="field">
+        <label for="quantity">Miqdor</label>
+        <input type="number" id="quantity" value="1" min="1" required>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="cancel-btn" id="cancelBtn">Bekor qilish</button>
+        <button type="button" class="confirm-btn" id="confirmBtn">Buyurtma berish</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js" defer></script>
+</body>
+</html>
