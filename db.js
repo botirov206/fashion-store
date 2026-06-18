@@ -1,4 +1,5 @@
 const { Pool } = require('pg');
+const { seedProducts, seedOrders } = require('./seed-data');
 
 function createPool() {
   if (process.env.DATABASE_URL) {
@@ -60,20 +61,14 @@ async function initDB(retries = 5) {
         );
       `);
 
-      const existing = await client.query('SELECT COUNT(*)::int AS count FROM products');
-      if (existing.rows[0].count === 0) {
-        await client.query(`
-          INSERT INTO products (name, category, price, description, stock) VALUES
-          ('Erkaklar ko''ylagi', 'Erkaklar', 89000, 'Klassik oq ko''ylak, 100% paxta', 50),
-          ('Ayollar bluzasi', 'Ayollar', 75000, 'Zamonaviy stil, turli ranglar', 40),
-          ('Denim shim', 'Unisex', 120000, 'Sifatli denim, slim fit', 35),
-          ('Sport kostyum', 'Sport', 150000, 'Yengil va qulay, to''q ko''k', 25),
-          ('Qishki kurtka', 'Qishki', 250000, 'Issiq va chidamli, qora rang', 20),
-          ('Paxta futbolka', 'Casual', 45000, 'Yumshoq paxta, ko''p ranglar', 60),
-          ('Biznes kostyum', 'Rasmiy', 350000, 'Erkaklar uchun to''q kulrang', 15),
-          ('Yozgi ko''ylak', 'Yozgi', 65000, 'Yengil mato, gul naqshli', 45);
-        `);
-        console.log('Seed data kiritildi');
+      const productsAdded = await seedProducts(pool);
+      if (productsAdded > 0) {
+        console.log(`Mahsulotlar: ${productsAdded} ta qo'shildi`);
+      }
+
+      const ordersAdded = await seedOrders(pool);
+      if (ordersAdded > 0) {
+        console.log(`Buyurtmalar: ${ordersAdded} ta qo'shildi`);
       }
 
       console.log('Ma\'lumotlar bazasi tayyor');

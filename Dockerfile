@@ -10,7 +10,7 @@ RUN npm install prisma --no-save --silent \
   && npx prisma generate \
   && npm uninstall prisma --silent
 
-COPY db.js server.js admin.js prisma-client.js ./
+COPY db.js server.js admin.js prisma-client.js seed-data.js ./
 COPY public ./public
 
 EXPOSE 3000
